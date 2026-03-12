@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CyberSafe – Web-Based Cyber Security Toolkit</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>"/>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <span class="shield">🛡️</span> CyberSafe
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">Home</a></li>
+    <li><a href="pages/password-checker.html">Strength</a></li>
+    <li><a href="pages/password-generator.html">Generator</a></li>
+    <li><a href="pages/encryption.html">Encrypt</a></li>
+    <li><a href="pages/hash-generator.html">Hash</a></li>
+    <li><a href="pages/phishing-detector.html">Phishing</a></li>
+    <li><a href="pages/tips.html">Tips</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag fade-up">🔒 Cybersecurity Toolkit v1.0</div>
+  <h1 class="fade-up fade-up-1">Your Digital Security<br/><span>Starts Here</span></h1>
+  <p class="fade-up fade-up-2">CyberSafe bundles 5 professional-grade security tools in one free, browser-based platform. No installation. No backend. Just security.</p>
+  <div class="fade-up fade-up-3" style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <a href="#tools" class="btn btn-primary">Explore Tools ↓</a>
+    <a href="pages/tips.html" class="btn btn-outline">Security Tips</a>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="container">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:3rem;" class="fade-up">
+    <div style="background:var(--card);padding:1.2rem;text-align:center;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:1.8rem;color:var(--accent);font-weight:700;">5</div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">Security Tools</div>
+    </div>
+    <div style="background:var(--card);padding:1.2rem;text-align:center;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:1.8rem;color:var(--accent2);font-weight:700;">0</div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">Backend Required</div>
+    </div>
+    <div style="background:var(--card);padding:1.2rem;text-align:center;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:1.8rem;color:var(--warn);font-weight:700;">256</div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">Bit Encryption</div>
+    </div>
+    <div style="background:var(--card);padding:1.2rem;text-align:center;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:1.8rem;color:var(--accent3);font-weight:700;">100%</div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-top:4px;">Free &amp; Open</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLS GRID -->
+<section class="section" id="tools">
+  <div class="container">
+    <div class="section-title">Security Tools</div>
+    <div class="section-sub">Click any tool to get started instantly — no signup required.</div>
+    <div class="grid-3">
+
+      <div class="card fade-up">
+        <span class="card-icon">🔍</span>
+        <h3>Password Strength Analyzer</h3>
+        <p>Evaluate any password instantly. Get real-time strength scoring with actionable improvement tips based on entropy and pattern analysis.</p>
+        <a href="pages/password-checker.html" class="card-link">Analyze Password →</a>
+      </div>
+
+      <div class="card fade-up fade-up-1">
+        <span class="card-icon">🔑</span>
+        <h3>Secure Password Generator</h3>
+        <p>Generate cryptographically random passwords with custom length, uppercase, lowercase, numbers, and special symbols in one click.</p>
+        <a href="pages/password-generator.html" class="card-link">Generate Password →</a>
+      </div>
+
+      <div class="card fade-up fade-up-2">
+        <span class="card-icon">🔐</span>
+        <h3>Text Encryption &amp; Decryption</h3>
+        <p>Encrypt and decrypt messages using AES-256-GCM via the browser's native Web Crypto API. Your data never leaves your device.</p>
+        <a href="pages/encryption.html" class="card-link">Encrypt Message →</a>
+      </div>
+
+      <div class="card fade-up">
+        <span class="card-icon">🧮</span>
+        <h3>File Hash Generator</h3>
+        <p>Compute MD5 and SHA-256 hashes for any file or text input. Verify file integrity and detect tampering with precision.</p>
+        <a href="pages/hash-generator.html" class="card-link">Generate Hash →</a>
+      </div>
+
+      <div class="card fade-up fade-up-1">
+        <span class="card-icon">🎣</span>
+        <h3>Phishing URL Detector</h3>
+        <p>Analyze any URL for suspicious patterns, deceptive subdomains, IP-based links, and known phishing indicators instantly.</p>
+        <a href="pages/phishing-detector.html" class="card-link">Check URL →</a>
+      </div>
+
+      <div class="card fade-up fade-up-2">
+        <span class="card-icon">💡</span>
+        <h3>Cyber Security Tips</h3>
+        <p>A curated library of cybersecurity best practices covering passwords, phishing, privacy, social engineering, and safe browsing habits.</p>
+        <a href="pages/tips.html" class="card-link">Learn More →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" style="padding-top:1rem;">
+  <div class="container">
+    <div class="section-title">How It Works</div>
+    <div class="section-sub">100% client-side. Your data never leaves your browser.</div>
+    <div class="grid-3">
+      <div style="display:flex;gap:1rem;align-items:flex-start;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:1.5rem;color:var(--accent);min-width:40px;">01</div>
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--white);margin-bottom:4px;">Choose a Tool</div>
+          <div style="font-size:0.85rem;color:var(--text2);">Select any security utility from the navigation or cards above.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:flex-start;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:1.5rem;color:var(--accent2);min-width:40px;">02</div>
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--white);margin-bottom:4px;">Enter Your Input</div>
+          <div style="font-size:0.85rem;color:var(--text2);">Type a password, paste text, upload a file, or enter a URL.</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:flex-start;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:1.5rem;color:var(--accent3);min-width:40px;">03</div>
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--white);margin-bottom:4px;">Get Instant Results</div>
+          <div style="font-size:0.85rem;color:var(--text2);">JavaScript processes everything locally. Results appear in real time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>🛡️ CyberSafe — Built with HTML · CSS · JavaScript &nbsp;|&nbsp; Deployed on <a href="https://pages.github.com" target="_blank">GitHub Pages</a></p>
+  <p style="margin-top:6px;">MCA Project · Shradha Mahesh Kuril · IIMS Vishnupuri · 2025-26</p>
+</footer>
+
+</body>
+</html>

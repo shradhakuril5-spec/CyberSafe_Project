@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Text Encryption – CyberSafe</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="../index.html"><span class="shield">🛡️</span> CyberSafe</a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="password-checker.html">Strength</a></li>
+    <li><a href="password-generator.html">Generator</a></li>
+    <li><a href="encryption.html" class="active">Encrypt</a></li>
+    <li><a href="hash-generator.html">Hash</a></li>
+    <li><a href="phishing-detector.html">Phishing</a></li>
+    <li><a href="tips.html">Tips</a></li>
+  </ul>
+</nav>
+
+<div class="tool-page">
+  <div class="tool-header fade-up">
+    <a href="../index.html" class="back">← Back to Home</a>
+    <h1>🔐 Text Encryption &amp; Decryption</h1>
+    <p>AES-256-GCM encryption powered by your browser's native Web Crypto API. Your data never leaves this page.</p>
+  </div>
+
+  <!-- ENCRYPT -->
+  <div class="tool-card fade-up fade-up-1">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:1.2rem;letter-spacing:1px;">▶ ENCRYPT</div>
+
+    <div class="input-group">
+      <label>Plain Text</label>
+      <textarea id="plainText" rows="4" placeholder="Enter the message you want to encrypt..."></textarea>
+    </div>
+    <div class="input-group">
+      <label>Secret Key (Passphrase)</label>
+      <input type="password" id="encKey" placeholder="Enter a strong passphrase..."/>
+    </div>
+    <button class="btn btn-primary btn-full" id="encBtn" style="margin-bottom:1rem;">🔒 Encrypt Message</button>
+
+    <div id="encResult" style="display:none;">
+      <label>Encrypted Output (Base64)</label>
+      <div class="result-box glow" id="encOutput" style="padding-right:90px;word-break:break-all;min-height:80px;font-size:0.78rem;">
+        <span id="encText" style="flex:1;"></span>
+        <button class="copy-btn" id="copyEnc">Copy</button>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text2);margin-top:6px;">⚠ Save your passphrase — it cannot be recovered. Share the ciphertext with the recipient along with the passphrase via a separate secure channel.</p>
+    </div>
+  </div>
+
+  <!-- DECRYPT -->
+  <div class="tool-card fade-up fade-up-2">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent2);margin-bottom:1.2rem;letter-spacing:1px;">▶ DECRYPT</div>
+
+    <div class="input-group">
+      <label>Encrypted Text (Base64)</label>
+      <textarea id="cipherText" rows="4" placeholder="Paste the encrypted Base64 string here..."></textarea>
+    </div>
+    <div class="input-group">
+      <label>Secret Key (Passphrase)</label>
+      <input type="password" id="decKey" placeholder="Enter the passphrase used during encryption..."/>
+    </div>
+    <button class="btn btn-green btn-full" id="decBtn" style="margin-bottom:1rem;">🔓 Decrypt Message</button>
+
+    <div id="decResult" style="display:none;">
+      <label>Decrypted Output</label>
+      <div class="result-box" style="padding-right:90px;min-height:80px;border-color:var(--accent2);box-shadow:var(--glow2);">
+        <span id="decText" style="flex:1;color:var(--accent2);word-break:break-all;"></span>
+        <button class="copy-btn" id="copyDec">Copy</button>
+      </div>
+    </div>
+    <div id="decError" style="display:none;background:rgba(255,51,102,0.08);border:1px solid var(--danger);border-radius:6px;padding:12px;font-size:0.85rem;color:var(--danger);margin-top:1rem;"></div>
+  </div>
+
+  <div class="tip-panel fade-up fade-up-3">
+    <strong>🔒 AES-256-GCM:</strong>
+    <p>This tool uses <strong>AES-GCM</strong> (Galois/Counter Mode) — the same encryption standard used by banks and governments. Your passphrase is converted into a 256-bit key using <strong>PBKDF2</strong> with 100,000 iterations and a random salt. The IV (Initialization Vector) is randomized per encryption.</p>
+  </div>
+</div>
+
+<footer>
+  <p>🛡️ CyberSafe · <a href="../index.html">Back to Home</a> · MCA Project 2025-26</p>
+</footer>
+
+<script>
+// Encode/decode helpers
+const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64 = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+
+async function deriveKey(passphrase, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt','decrypt']
+  );
+}
+
+async function encrypt(plaintext, passphrase) {
+  const enc    = new TextEncoder();
+  const salt   = crypto.getRandomValues(new Uint8Array(16));
+  const iv     = crypto.getRandomValues(new Uint8Array(12));
+  const key    = await deriveKey(passphrase, salt);
+  const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
+  // Pack: salt(16) + iv(12) + ciphertext
+  const combined = new Uint8Array(16 + 12 + cipher.byteLength);
+  combined.set(salt, 0); combined.set(iv, 16); combined.set(new Uint8Array(cipher), 28);
+  return b64(combined.buffer);
+}
+
+async function decrypt(b64str, passphrase) {
+  const data   = unb64(b64str);
+  const salt   = data.slice(0, 16);
+  const iv     = data.slice(16, 28);
+  const cipher = data.slice(28);
+  const key    = await deriveKey(passphrase, salt);
+  const plain  = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher);
+  return new TextDecoder().decode(plain);
+}
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✔ Copied'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+document.getElementById('encBtn').addEventListener('click', async () => {
+  const txt = document.getElementById('plainText').value.trim();
+  const key = document.getElementById('encKey').value;
+  if (!txt || !key) { alert('Please enter both plain text and a passphrase.'); return; }
+  try {
+    const result = await encrypt(txt, key);
+    document.getElementById('encText').textContent = result;
+    document.getElementById('encResult').style.display = 'block';
+    document.getElementById('copyEnc').onclick = () => copyText(result, document.getElementById('copyEnc'));
+  } catch (e) { alert('Encryption failed: ' + e.message); }
+});
+
+document.getElementById('decBtn').addEventListener('click', async () => {
+  const txt = document.getElementById('cipherText').value.trim();
+  const key = document.getElementById('decKey').value;
+  const errDiv = document.getElementById('decError');
+  if (!txt || !key) { alert('Please enter both cipher text and the passphrase.'); return; }
+  try {
+    const result = await decrypt(txt, key);
+    document.getElementById('decText').textContent = result;
+    document.getElementById('decResult').style.display = 'block';
+    errDiv.style.display = 'none';
+    document.getElementById('copyDec').onclick = () => copyText(result, document.getElementById('copyDec'));
+  } catch (e) {
+    document.getElementById('decResult').style.display = 'none';
+    errDiv.style.display = 'block';
+    errDiv.textContent = '❌ Decryption failed. The passphrase may be incorrect or the ciphertext is corrupted.';
+  }
+});
+</script>
+</body>
+</html>

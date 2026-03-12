@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phishing URL Detector – CyberSafe</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="../index.html"><span class="shield">🛡️</span> CyberSafe</a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="password-checker.html">Strength</a></li>
+    <li><a href="password-generator.html">Generator</a></li>
+    <li><a href="encryption.html">Encrypt</a></li>
+    <li><a href="hash-generator.html">Hash</a></li>
+    <li><a href="phishing-detector.html" class="active">Phishing</a></li>
+    <li><a href="tips.html">Tips</a></li>
+  </ul>
+</nav>
+
+<div class="tool-page">
+  <div class="tool-header fade-up">
+    <a href="../index.html" class="back">← Back to Home</a>
+    <h1>🎣 Phishing URL Detector</h1>
+    <p>Analyze any URL for suspicious patterns, deceptive subdomains, IP-based links, typosquatting, and known phishing indicators.</p>
+  </div>
+
+  <div class="tool-card fade-up fade-up-1">
+    <div class="input-group">
+      <label>Enter URL to Analyze</label>
+      <div class="input-row">
+        <input type="text" id="urlInput" placeholder="https://example.com/login" spellcheck="false"/>
+        <button class="btn btn-primary" id="checkBtn">Analyze</button>
+      </div>
+    </div>
+
+    <div id="result" style="display:none;margin-top:1.5rem;"></div>
+  </div>
+
+  <!-- Test examples -->
+  <div class="tool-card fade-up fade-up-2">
+    <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--white);margin-bottom:1rem;">Test Examples</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+      <button class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px;" onclick="testURL('https://www.google.com')">google.com ✅</button>
+      <button class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px;" onclick="testURL('http://paypal.com.login-secure.xyz/account')">PayPal phish ⚠</button>
+      <button class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px;" onclick="testURL('http://192.168.1.1/admin/login')">IP login ⚠</button>
+      <button class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px;" onclick="testURL('https://amazon-secure-login.tk/verify')">Free TLD phish ⚠</button>
+      <button class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px;" onclick="testURL('https://github.com/login')">GitHub ✅</button>
+      <button class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px;" onclick="testURL('http://bit.ly/3xFake99?redirect=paypal-login.ru')">Shortened URL ⚠</button>
+    </div>
+  </div>
+
+  <!-- Checks reference -->
+  <div class="tool-card fade-up fade-up-3">
+    <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--white);margin-bottom:1rem;">What We Check</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.82rem;">
+      <div style="color:var(--text2);">🔍 IP address as hostname</div>
+      <div style="color:var(--text2);">🔍 Suspicious free TLDs (.tk .ml .ga)</div>
+      <div style="color:var(--text2);">🔍 Deceptive subdomains</div>
+      <div style="color:var(--text2);">🔍 URL shortener services</div>
+      <div style="color:var(--text2);">🔍 Typosquatting of known brands</div>
+      <div style="color:var(--text2);">🔍 Keyword stuffing (secure, login, verify)</div>
+      <div style="color:var(--text2);">🔍 Excessive hyphens in domain</div>
+      <div style="color:var(--text2);">🔍 HTTP (non-HTTPS) usage</div>
+      <div style="color:var(--text2);">🔍 Very long or complex URLs</div>
+      <div style="color:var(--text2);">🔍 Multiple redirects in path</div>
+    </div>
+  </div>
+
+  <div class="tip-panel">
+    <strong>⚠ Disclaimer:</strong>
+    <p>This tool uses <strong>heuristic pattern analysis</strong> and cannot guarantee 100% accuracy. Always verify suspicious links with official sources or a real-time threat intelligence service like <strong>Google Safe Browsing</strong> before clicking.</p>
+  </div>
+</div>
+
+<footer>
+  <p>🛡️ CyberSafe · <a href="../index.html">Back to Home</a> · MCA Project 2025-26</p>
+</footer>
+
+<script>
+const SUSPICIOUS_TLDS  = ['tk','ml','ga','cf','gq','xyz','top','club','online','site','info','biz','ru','cn','pw'];
+const SHORTENERS       = ['bit.ly','tinyurl.com','t.co','goo.gl','ow.ly','is.gd','buff.ly','rb.gy','cutt.ly','shorte.st','adf.ly'];
+const PHISH_KEYWORDS   = ['login','signin','verify','secure','account','update','confirm','banking','password','credential','authenticate','webscr','ebayisapi'];
+const BRAND_SQUATS     = ['paypal','amazon','google','facebook','apple','microsoft','netflix','instagram','twitter','linkedin','dropbox','whatsapp','chase','wellsfargo','bankofamerica','citibank','hsbc'];
+
+function analyzeURL(raw) {
+  const findings = [];
+  let score = 0;
+
+  if (!raw.startsWith('http://') && !raw.startsWith('https://')) raw = 'http://' + raw;
+
+  let parsed;
+  try { parsed = new URL(raw); } catch { return { error: true }; }
+
+  const hostname = parsed.hostname.toLowerCase();
+  const path     = parsed.pathname.toLowerCase();
+  const full     = raw.toLowerCase();
+
+  // 1. HTTP (not HTTPS)
+  if (parsed.protocol === 'http:') {
+    findings.push({ sev: 'warn', msg: 'Uses HTTP (not HTTPS) — connection is unencrypted and insecure.' });
+    score += 1;
+  }
+
+  // 2. IP address
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) {
+    findings.push({ sev: 'danger', msg: 'URL uses an IP address instead of a domain name — highly suspicious.' });
+    score += 3;
+  }
+
+  // 3. Suspicious TLD
+  const tld = hostname.split('.').pop();
+  if (SUSPICIOUS_TLDS.includes(tld)) {
+    findings.push({ sev: 'danger', msg: `Uses free/suspicious TLD ".${tld}" — commonly used in phishing campaigns.` });
+    score += 2;
+  }
+
+  // 4. URL shortener
+  if (SHORTENERS.some(s => hostname.includes(s))) {
+    findings.push({ sev: 'warn', msg: 'URL shortener detected — the real destination is hidden. Avoid clicking.' });
+    score += 2;
+  }
+
+  // 5. Brand typosquatting in subdomains
+  const subdomain = hostname.split('.').slice(0,-2).join('.');
+  BRAND_SQUATS.forEach(brand => {
+    if (subdomain.includes(brand)) {
+      findings.push({ sev: 'danger', msg: `Suspicious: "${brand}" appears in the subdomain ("${subdomain}"), not in the real domain. Classic phishing technique.` });
+      score += 3;
+    }
+  });
+
+  // 6. Brand in path but not hostname
+  BRAND_SQUATS.forEach(brand => {
+    if (!hostname.includes(brand) && (path.includes(brand) || parsed.search.toLowerCase().includes(brand))) {
+      findings.push({ sev: 'warn', msg: `Brand name "${brand}" found in URL path/params but NOT in the domain — possible spoofing.` });
+      score += 2;
+    }
+  });
+
+  // 7. Phishing keywords in path/domain
+  const hits = PHISH_KEYWORDS.filter(k => full.includes(k));
+  if (hits.length >= 2) {
+    findings.push({ sev: 'warn', msg: `Multiple phishing keywords detected: [${hits.slice(0,4).join(', ')}].` });
+    score += hits.length;
+  }
+
+  // 8. Excessive hyphens
+  const domainHyphens = (hostname.match(/-/g)||[]).length;
+  if (domainHyphens >= 3) {
+    findings.push({ sev: 'warn', msg: `Domain contains ${domainHyphens} hyphens — uncommon for legitimate sites, typical of phishing domains.` });
+    score += 2;
+  }
+
+  // 9. Long URL
+  if (raw.length > 150) {
+    findings.push({ sev: 'warn', msg: `Very long URL (${raw.length} chars) — legitimate sites rarely use URLs this long.` });
+    score += 1;
+  }
+
+  // 10. Multiple redirect parameters
+  if ((full.match(/redirect|return|url=|goto=/g)||[]).length >= 2) {
+    findings.push({ sev: 'danger', msg: 'Multiple redirect parameters detected — may be used to chain phishing redirects.' });
+    score += 2;
+  }
+
+  // 11. HTTPS with suspicious domain (brand squatting in main domain)
+  const mainDomain = hostname.split('.').slice(-2).join('.');
+  BRAND_SQUATS.forEach(brand => {
+    const parts = mainDomain.replace(/-/g,'').replace(/_/g,'');
+    if (parts.includes(brand) && mainDomain !== brand+'.com' && mainDomain !== brand+'.org' && mainDomain !== brand+'.net') {
+      if (!findings.some(f => f.msg.includes(brand))) {
+        findings.push({ sev: 'warn', msg: `Domain "${mainDomain}" resembles brand "${brand}" but is not the official domain.` });
+        score += 2;
+      }
+    }
+  });
+
+  // Good signs
+  if (findings.length === 0) {
+    findings.push({ sev: 'safe', msg: 'No suspicious patterns detected in this URL.' });
+    findings.push({ sev: 'safe', msg: `Protocol: ${parsed.protocol.toUpperCase().replace(':','')} ✔` });
+    findings.push({ sev: 'safe', msg: `Domain: ${hostname} appears legitimate.` });
+  }
+
+  return { score, findings, hostname, tld, parsed };
+}
+
+function renderResult(raw) {
+  const res = analyzeURL(raw);
+  const div = document.getElementById('result');
+  div.style.display = 'block';
+
+  if (res.error) {
+    div.innerHTML = `<div style="color:var(--danger);font-family:'Share Tech Mono',monospace;">❌ Invalid URL. Please include http:// or https://</div>`;
+    return;
+  }
+
+  const { score, findings, hostname } = res;
+  let verdict, vClass, vIcon;
+  if (score === 0)      { verdict='LIKELY SAFE';    vClass='badge-safe';   vIcon='✅'; }
+  else if (score <= 2)  { verdict='LOW RISK';       vClass='badge-warn';   vIcon='⚠️'; }
+  else if (score <= 5)  { verdict='SUSPICIOUS';     vClass='badge-warn';   vIcon='🚨'; }
+  else                  { verdict='HIGH RISK — LIKELY PHISHING'; vClass='badge-danger'; vIcon='☠️'; }
+
+  const rows = findings.map(f => {
+    const colors = { safe:'var(--accent2)', warn:'var(--warn)', danger:'var(--danger)' };
+    const icons  = { safe:'✔', warn:'⚠', danger:'✗' };
+    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="color:${colors[f.sev]};font-weight:bold;min-width:14px;">${icons[f.sev]}</span>
+      <span style="font-size:0.85rem;color:var(--text);">${f.msg}</span>
+    </div>`;
+  }).join('');
+
+  div.innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <span class="badge ${vClass}" style="font-size:0.85rem;padding:6px 16px;">${vIcon} ${verdict}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text2);margin-left:12px;">Risk Score: ${score}/15</span>
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--text2);margin-bottom:1rem;word-break:break-all;background:var(--bg2);padding:10px 12px;border-radius:5px;border:1px solid var(--border);">
+      ${raw.length > 100 ? raw.substring(0,100)+'…' : raw}
+    </div>
+    <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--white);margin-bottom:0.5rem;">Analysis Findings</div>
+    ${rows}
+  `;
+}
+
+document.getElementById('checkBtn').addEventListener('click', () => {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { alert('Please enter a URL.'); return; }
+  renderResult(url);
+});
+
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('checkBtn').click();
+});
+
+function testURL(url) {
+  document.getElementById('urlInput').value = url;
+  renderResult(url);
+}
+</script>
+</body>
+</html>

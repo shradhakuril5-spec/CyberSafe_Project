@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cyber Security Tips – CyberSafe</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="../index.html"><span class="shield">🛡️</span> CyberSafe</a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="password-checker.html">Strength</a></li>
+    <li><a href="password-generator.html">Generator</a></li>
+    <li><a href="encryption.html">Encrypt</a></li>
+    <li><a href="hash-generator.html">Hash</a></li>
+    <li><a href="phishing-detector.html">Phishing</a></li>
+    <li><a href="tips.html" class="active">Tips</a></li>
+  </ul>
+</nav>
+
+<div style="max-width:900px;margin:0 auto;padding:3rem 2rem 5rem;position:relative;z-index:1;">
+  <div class="tool-header fade-up">
+    <a href="../index.html" class="back">← Back to Home</a>
+    <h1>💡 Cyber Security Tips</h1>
+    <p>Practical, actionable advice to protect your digital life. Updated based on current threats and best practices.</p>
+  </div>
+
+  <!-- Filter buttons -->
+  <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:2rem;" class="fade-up fade-up-1">
+    <button class="filter-btn active" data-cat="all">All Tips</button>
+    <button class="filter-btn" data-cat="passwords">🔑 Passwords</button>
+    <button class="filter-btn" data-cat="phishing">🎣 Phishing</button>
+    <button class="filter-btn" data-cat="privacy">👁 Privacy</button>
+    <button class="filter-btn" data-cat="devices">💻 Devices</button>
+    <button class="filter-btn" data-cat="social">👥 Social</button>
+  </div>
+
+  <div id="tipsGrid" class="grid-2"></div>
+</div>
+
+<footer>
+  <p>🛡️ CyberSafe · <a href="../index.html">Back to Home</a> · MCA Project 2025-26</p>
+</footer>
+
+<style>
+  .filter-btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600; font-size: 0.82rem;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: rgba(0,212,255,0.08);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .tip-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: border-color 0.2s, transform 0.2s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .tip-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-2px); }
+  .tip-cat {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 0.75rem;
+  }
+  .tip-card h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+  .tip-card p { font-size: 0.85rem; color: var(--text2); line-height: 1.65; }
+  .level-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; padding: 2px 6px;
+    border-radius: 2px; float: right;
+  }
+</style>
+
+<script>
+const TIPS = [
+  // PASSWORDS
+  { cat:'passwords', icon:'🔑', title:'Use Passphrases Instead of Passwords', level:'Beginner', levelColor:'var(--accent2)',
+    body:'A passphrase like "Coffee-River-Table-88!" is both memorable and far stronger than "P@ssw0rd". Aim for 15+ characters combining random words with numbers and symbols.' },
+  { cat:'passwords', icon:'🔑', title:'Never Reuse Passwords Across Sites', level:'Essential', levelColor:'var(--danger)',
+    body:'If one site is breached, attackers try your password everywhere else (credential stuffing). Use a unique password for every account — a password manager makes this easy.' },
+  { cat:'passwords', icon:'🔑', title:'Use a Password Manager', level:'Recommended', levelColor:'var(--accent)',
+    body:'Tools like Bitwarden, 1Password, or KeePass generate and store strong unique passwords. You only need to remember one master passphrase. Most are free and open-source.' },
+  { cat:'passwords', icon:'🔑', title:'Enable Two-Factor Authentication (2FA)', level:'Essential', levelColor:'var(--danger)',
+    body:'2FA adds a second verification step (usually a time-based code from an app like Authy or Google Authenticator). Even if your password is stolen, attackers cannot log in without your second factor.' },
+  { cat:'passwords', icon:'🔑', title:'Change Passwords After a Breach', level:'Essential', levelColor:'var(--danger)',
+    body:'Check haveibeenpwned.com regularly. If your email appears in a breach, change that password immediately and on any sites where you reused it.' },
+
+  // PHISHING
+  { cat:'phishing', icon:'🎣', title:'Verify the Sender Before Clicking Links', level:'Essential', levelColor:'var(--danger)',
+    body:'Phishing emails mimic banks, PayPal, and Apple. Always check the actual email address (not just the display name). When in doubt, go directly to the official website — do not click the link in the email.' },
+  { cat:'phishing', icon:'🎣', title:'Hover Before You Click', level:'Beginner', levelColor:'var(--accent2)',
+    body:'Hover your mouse over any link before clicking. The real URL appears in the bottom bar of your browser. If it looks suspicious or different from what you expect, do not click.' },
+  { cat:'phishing', icon:'🎣', title:'Be Suspicious of Urgency', level:'Intermediate', levelColor:'var(--accent)',
+    body:'"Your account will be deleted in 24 hours!" is a classic phishing tactic. Legitimate companies do not pressure you to act immediately. Take your time and verify through official channels.' },
+  { cat:'phishing', icon:'🎣', title:'Check for HTTPS — But Don\'t Trust It Blindly', level:'Intermediate', levelColor:'var(--accent)',
+    body:'HTTPS means the connection is encrypted, not that the site is legitimate. Phishing sites also use HTTPS. Always verify the actual domain name, not just the padlock icon.' },
+  { cat:'phishing', icon:'🎣', title:'Never Enter Credentials on Pop-up Windows', level:'Essential', levelColor:'var(--danger)',
+    body:'Legitimate logins do not happen in browser pop-ups or iframes. If a site asks you to log in to Google or Facebook in a pop-up, close it and go directly to the official site.' },
+
+  // PRIVACY
+  { cat:'privacy', icon:'👁', title:'Audit Your App Permissions', level:'Intermediate', levelColor:'var(--accent)',
+    body:'Many apps request far more permissions than they need. Regularly review which apps have access to your camera, microphone, location, and contacts. Revoke permissions that are not needed.' },
+  { cat:'privacy', icon:'👁', title:'Use a VPN on Public Wi-Fi', level:'Recommended', levelColor:'var(--accent)',
+    body:'Public Wi-Fi in cafes and airports is often unencrypted. Anyone on the same network can intercept your traffic. A VPN encrypts your connection and hides it from other users on the network.' },
+  { cat:'privacy', icon:'👁', title:'Regularly Clear Cookies and Cache', level:'Beginner', levelColor:'var(--accent2)',
+    body:'Cookies track your browsing across websites. Clearing them periodically, or using a browser extension like Privacy Badger, reduces cross-site tracking and data collection.' },
+  { cat:'privacy', icon:'👁', title:'Be Careful What You Share Online', level:'Beginner', levelColor:'var(--accent2)',
+    body:'Details like your birthday, phone number, home city, and pet names are often used as security question answers. Avoid posting this information publicly on social media.' },
+
+  // DEVICES
+  { cat:'devices', icon:'💻', title:'Keep Software and OS Updated', level:'Essential', levelColor:'var(--danger)',
+    body:'Most malware exploits known vulnerabilities in outdated software. Enable automatic updates for your operating system, browser, and all installed apps. Updates often contain critical security patches.' },
+  { cat:'devices', icon:'💻', title:'Lock Your Screen When Away', level:'Beginner', levelColor:'var(--accent2)',
+    body:'Use Windows+L (Windows) or Cmd+Control+Q (Mac) to instantly lock your screen. Set a short auto-lock timeout (1–2 minutes) for additional protection in case you forget.' },
+  { cat:'devices', icon:'💻', title:'Encrypt Your Hard Drive', level:'Advanced', levelColor:'var(--accent3)',
+    body:'Enable BitLocker (Windows) or FileVault (Mac) to encrypt your entire drive. If your laptop is stolen, the thief cannot access your files without your login password.' },
+  { cat:'devices', icon:'💻', title:'Back Up Your Data Regularly', level:'Recommended', levelColor:'var(--accent)',
+    body:'Follow the 3-2-1 rule: 3 copies of your data, on 2 different media types, with 1 offsite backup (cloud). Ransomware cannot harm you if you have a clean offline backup.' },
+  { cat:'devices', icon:'💻', title:'Beware of USB Drives You Find', level:'Intermediate', levelColor:'var(--accent)',
+    body:'"Baiting" is a real attack. Attackers leave infected USB drives in public places. Never plug in a USB drive you found — it may install malware the moment you connect it.' },
+
+  // SOCIAL ENGINEERING
+  { cat:'social', icon:'👥', title:'Verify Requests Out-of-Band', level:'Intermediate', levelColor:'var(--accent)',
+    body:'If your "boss" emails asking for an urgent wire transfer or gift cards, call them directly to verify. Business Email Compromise (BEC) is one of the most costly cybercrimes, costing billions annually.' },
+  { cat:'social', icon:'👥', title:'Think Before You Share on Social Media', level:'Beginner', levelColor:'var(--accent2)',
+    body:'Attackers use LinkedIn, Instagram, and Facebook to gather information for targeted spear-phishing attacks. Limit public profile details like your employer, job title, and daily schedule.' },
+  { cat:'social', icon:'👥', title:'Educate Those Around You', level:'Community', levelColor:'var(--accent2)',
+    body:'Family members and colleagues are often the weakest link in security. Share what you learn. A single click from one uninformed person can compromise an entire network.' },
+];
+
+function renderTips(cat) {
+  const filtered = cat === 'all' ? TIPS : TIPS.filter(t => t.cat === cat);
+  document.getElementById('tipsGrid').innerHTML = filtered.map(tip => `
+    <div class="tip-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <span class="tip-cat" style="background:rgba(0,212,255,0.07);color:var(--accent);border:1px solid rgba(0,212,255,0.2);">${tip.cat}</span>
+        <span class="level-badge" style="background:rgba(0,0,0,0.3);color:${tip.levelColor};border:1px solid ${tip.levelColor}22;">${tip.level}</span>
+      </div>
+      <h3>${tip.icon} &nbsp;${tip.title}</h3>
+      <p>${tip.body}</p>
+    </div>
+  `).join('');
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTips(btn.dataset.cat);
+  });
+});
+
+renderTips('all');
+</script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hash Generator – CyberSafe</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="../index.html"><span class="shield">🛡️</span> CyberSafe</a>
+  <ul class="nav-links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="password-checker.html">Strength</a></li>
+    <li><a href="password-generator.html">Generator</a></li>
+    <li><a href="encryption.html">Encrypt</a></li>
+    <li><a href="hash-generator.html" class="active">Hash</a></li>
+    <li><a href="phishing-detector.html">Phishing</a></li>
+    <li><a href="tips.html">Tips</a></li>
+  </ul>
+</nav>
+
+<div class="tool-page">
+  <div class="tool-header fade-up">
+    <a href="../index.html" class="back">← Back to Home</a>
+    <h1>🧮 File Hash Generator</h1>
+    <p>Compute MD5, SHA-1, SHA-256, and SHA-512 hashes for any text or file. Verify integrity and detect tampering.</p>
+  </div>
+
+  <!-- Text hashing -->
+  <div class="tool-card fade-up fade-up-1">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:1.2rem;letter-spacing:1px;">▶ HASH TEXT INPUT</div>
+    <div class="input-group">
+      <label>Input Text</label>
+      <textarea id="textInput" rows="4" placeholder="Type or paste any text to hash..."></textarea>
+    </div>
+    <button class="btn btn-primary btn-full" id="hashTextBtn" style="margin-bottom:1.5rem;">⟳ Compute Hashes</button>
+
+    <div id="textHashes"></div>
+  </div>
+
+  <!-- File hashing -->
+  <div class="tool-card fade-up fade-up-2">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent2);margin-bottom:1.2rem;letter-spacing:1px;">▶ HASH FILE</div>
+
+    <div id="dropZone" style="border:2px dashed var(--border);border-radius:8px;padding:2.5rem;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:1.2rem;">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem;">📂</div>
+      <div style="font-family:'Rajdhani',sans-serif;font-weight:600;color:var(--white);margin-bottom:4px;">Drop a file here or click to select</div>
+      <div style="font-size:0.82rem;color:var(--text2);">Any file type supported. Processed entirely in your browser.</div>
+      <input type="file" id="fileInput" style="display:none;"/>
+    </div>
+
+    <div id="fileInfo" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:1rem;font-family:'Share Tech Mono',monospace;font-size:0.82rem;color:var(--text2);"></div>
+
+    <div id="fileHashes"></div>
+  </div>
+
+  <!-- Hash verify -->
+  <div class="tool-card fade-up fade-up-3">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;color:var(--warn);margin-bottom:1.2rem;letter-spacing:1px;">▶ VERIFY HASH</div>
+    <div class="input-group">
+      <label>Paste a hash to compare</label>
+      <input type="text" id="compareHash" placeholder="e.g. 2cf24dba5fb0a..."/>
+    </div>
+    <div id="verifyResult" style="margin-top:0.5rem;font-family:'Share Tech Mono',monospace;font-size:0.85rem;"></div>
+  </div>
+
+  <div class="tip-panel">
+    <strong>⚠ MD5 vs SHA-256:</strong>
+    <p><strong>MD5</strong> is fast but cryptographically broken — use only for quick integrity checks, not security. <strong>SHA-256</strong> is the current gold standard for file integrity verification. For password storage, always use <strong>bcrypt</strong> or <strong>Argon2</strong> — never raw SHA-256.</p>
+  </div>
+</div>
+
+<footer>
+  <p>🛡️ CyberSafe · <a href="../index.html">Back to Home</a> · MCA Project 2025-26</p>
+</footer>
+
+<style>
+  #dropZone:hover, #dropZone.drag { border-color: var(--accent); background: rgba(0,212,255,0.04); }
+</style>
+
+<script>
+// --- MD5 implementation (pure JS) ---
+function md5(str) {
+  function safeAdd(x,y){var lsw=(x&0xFFFF)+(y&0xFFFF);return(((x>>16)+(y>>16)+(lsw>>16))<<16)|(lsw&0xFFFF);}
+  function bitRotateLeft(num,cnt){return(num<<cnt)|(num>>>(32-cnt));}
+  function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b);}
+  function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|(~b&d),a,b,x,s,t);}
+  function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&~d),a,b,x,s,t);}
+  function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t);}
+  function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|~d),a,b,x,s,t);}
+  function calc(x,len){
+    x[len>>5]|=0x80<<(len%32);x[(((len+64)>>>9)<<4)+14]=len;
+    var i,olda,oldb,oldc,oldd,a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+    for(i=0;i<x.length;i+=16){olda=a;oldb=b;oldc=c;oldd=d;
+      a=md5ff(a,b,c,d,x[i],7,-680876936);d=md5ff(d,a,b,c,x[i+1],12,-389564586);c=md5ff(c,d,a,b,x[i+2],17,606105819);b=md5ff(b,c,d,a,x[i+3],22,-1044525330);
+      a=md5ff(a,b,c,d,x[i+4],7,-176418897);d=md5ff(d,a,b,c,x[i+5],12,1200080426);c=md5ff(c,d,a,b,x[i+6],17,-1473231341);b=md5ff(b,c,d,a,x[i+7],22,-45705983);
+      a=md5ff(a,b,c,d,x[i+8],7,1770035416);d=md5ff(d,a,b,c,x[i+9],12,-1958414417);c=md5ff(c,d,a,b,x[i+10],17,-42063);b=md5ff(b,c,d,a,x[i+11],22,-1990404162);
+      a=md5ff(a,b,c,d,x[i+12],7,1804603682);d=md5ff(d,a,b,c,x[i+13],12,-40341101);c=md5ff(c,d,a,b,x[i+14],17,-1502002290);b=md5ff(b,c,d,a,x[i+15],22,1236535329);
+      a=md5gg(a,b,c,d,x[i+1],5,-165796510);d=md5gg(d,a,b,c,x[i+6],9,-1069501632);c=md5gg(c,d,a,b,x[i+11],14,643717713);b=md5gg(b,c,d,a,x[i],20,-373897302);
+      a=md5gg(a,b,c,d,x[i+5],5,-701558691);d=md5gg(d,a,b,c,x[i+10],9,38016083);c=md5gg(c,d,a,b,x[i+15],14,-660478335);b=md5gg(b,c,d,a,x[i+4],20,-405537848);
+      a=md5gg(a,b,c,d,x[i+9],5,568446438);d=md5gg(d,a,b,c,x[i+14],9,-1019803690);c=md5gg(c,d,a,b,x[i+3],14,-187363961);b=md5gg(b,c,d,a,x[i+8],20,1163531501);
+      a=md5gg(a,b,c,d,x[i+13],5,-1444681467);d=md5gg(d,a,b,c,x[i+2],9,-51403784);c=md5gg(c,d,a,b,x[i+7],14,1735328473);b=md5gg(b,c,d,a,x[i+12],20,-1926607734);
+      a=md5hh(a,b,c,d,x[i+5],4,-378558);d=md5hh(d,a,b,c,x[i+8],11,-2022574463);c=md5hh(c,d,a,b,x[i+11],16,1839030562);b=md5hh(b,c,d,a,x[i+14],23,-35309556);
+      a=md5hh(a,b,c,d,x[i+1],4,-1530992060);d=md5hh(d,a,b,c,x[i+4],11,1272893353);c=md5hh(c,d,a,b,x[i+7],16,-155497632);b=md5hh(b,c,d,a,x[i+10],23,-1094730640);
+      a=md5hh(a,b,c,d,x[i+13],4,681279174);d=md5hh(d,a,b,c,x[i],11,-358537222);c=md5hh(c,d,a,b,x[i+3],16,-722521979);b=md5hh(b,c,d,a,x[i+6],23,76029189);
+      a=md5hh(a,b,c,d,x[i+9],4,-640364487);d=md5hh(d,a,b,c,x[i+12],11,-421815835);c=md5hh(c,d,a,b,x[i+15],16,530742520);b=md5hh(b,c,d,a,x[i+2],23,-995338651);
+      a=md5ii(a,b,c,d,x[i],6,-198630844);d=md5ii(d,a,b,c,x[i+7],10,1126891415);c=md5ii(c,d,a,b,x[i+14],15,-1416354905);b=md5ii(b,c,d,a,x[i+5],21,-57434055);
+      a=md5ii(a,b,c,d,x[i+12],6,1700485571);d=md5ii(d,a,b,c,x[i+3],10,-1894986606);c=md5ii(c,d,a,b,x[i+10],15,-1051523);b=md5ii(b,c,d,a,x[i+1],21,-2054922799);
+      a=md5ii(a,b,c,d,x[i+8],6,1873313359);d=md5ii(d,a,b,c,x[i+15],10,-30611744);c=md5ii(c,d,a,b,x[i+6],15,-1560198380);b=md5ii(b,c,d,a,x[i+13],21,1309151649);
+      a=md5ii(a,b,c,d,x[i+4],6,-145523070);d=md5ii(d,a,b,c,x[i+11],10,-1120210379);c=md5ii(c,d,a,b,x[i+2],15,718787259);b=md5ii(b,c,d,a,x[i+9],21,-343485551);
+      a=safeAdd(a,olda);b=safeAdd(b,oldb);c=safeAdd(c,oldc);d=safeAdd(d,oldd);
+    }return[a,b,c,d];
+  }
+  function str2bin(s){var b=[],m=0xFF;for(var i=0;i<s.length*8;i+=8)b[i>>5]|=(s.charCodeAt(i/8)&m)<<(i%32);return b;}
+  function bin2hex(b){var hex='',lsb;for(var i=0;i<b.length*4;i++){lsb=b[i>>2]>>(i%4)*8;hex+='0123456789abcdef'.charAt((lsb>>4)&0xF)+'0123456789abcdef'.charAt(lsb&0xF);}return hex;}
+  try{str=unescape(encodeURIComponent(str));}catch(e){}
+  return bin2hex(calc(str2bin(str),str.length*8));
+}
+
+// SHA via WebCrypto
+async function sha(algo, data) {
+  const buf = await crypto.subtle.digest(algo, data);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function hashRow(label, value, color='var(--accent)') {
+  return `
+    <div class="hash-row">
+      <div class="hash-label">${label}</div>
+      <div class="result-box" style="padding-right:90px;font-size:0.78rem;word-break:break-all;border-color:rgba(0,212,255,0.2);">
+        <span style="flex:1;color:${color};">${value}</span>
+        <button class="copy-btn" onclick="copyHash(this,'${value}')">Copy</button>
+      </div>
+    </div>`;
+}
+
+function copyHash(btn, val) {
+  navigator.clipboard.writeText(val).then(() => {
+    btn.textContent = '✔'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// Keep last computed hashes for verify
+let lastHashes = [];
+
+async function hashString(str) {
+  const enc = new TextEncoder();
+  const buf = enc.encode(str);
+  const [m, s1, s256, s512] = await Promise.all([
+    Promise.resolve(md5(str)),
+    sha('SHA-1', buf), sha('SHA-256', buf), sha('SHA-512', buf)
+  ]);
+  lastHashes = [m, s1, s256, s512];
+  document.getElementById('textHashes').innerHTML =
+    hashRow('MD5 (128-bit)', m, 'var(--warn)') +
+    hashRow('SHA-1 (160-bit)', s1, 'var(--accent3)') +
+    hashRow('SHA-256 (256-bit)', s256, 'var(--accent)') +
+    hashRow('SHA-512 (512-bit)', s512, 'var(--accent2)');
+  checkVerify();
+}
+
+document.getElementById('hashTextBtn').addEventListener('click', () => {
+  const txt = document.getElementById('textInput').value;
+  if (!txt) { alert('Please enter some text.'); return; }
+  hashString(txt);
+});
+
+// Auto-hash on type (debounced)
+let debounce;
+document.getElementById('textInput').addEventListener('input', () => {
+  clearTimeout(debounce);
+  if (!document.getElementById('textInput').value) { document.getElementById('textHashes').innerHTML=''; return; }
+  debounce = setTimeout(() => hashString(document.getElementById('textInput').value), 500);
+});
+
+// File hashing
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag'); processFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) processFile(fileInput.files[0]); });
+
+async function processFile(file) {
+  const info = document.getElementById('fileInfo');
+  const size = file.size < 1024 ? file.size + ' B' : file.size < 1048576 ? (file.size/1024).toFixed(2)+' KB' : (file.size/1048576).toFixed(2)+' MB';
+  info.style.display = 'block';
+  info.textContent = `File: ${file.name}  |  Size: ${size}  |  Type: ${file.type || 'unknown'}`;
+  document.getElementById('fileHashes').innerHTML = '<div style="color:var(--text2);font-family:\'Share Tech Mono\',monospace;font-size:0.82rem;">Computing hashes...</div>';
+
+  const buf = await file.arrayBuffer();
+  const strForMd5 = Array.from(new Uint8Array(buf)).map(b=>String.fromCharCode(b)).join('');
+  const [m, s1, s256, s512] = await Promise.all([
+    Promise.resolve(md5(strForMd5)),
+    sha('SHA-1', buf), sha('SHA-256', buf), sha('SHA-512', buf)
+  ]);
+  lastHashes = [m, s1, s256, s512];
+  document.getElementById('fileHashes').innerHTML =
+    hashRow('MD5 (128-bit)', m, 'var(--warn)') +
+    hashRow('SHA-1 (160-bit)', s1, 'var(--accent3)') +
+    hashRow('SHA-256 (256-bit)', s256, 'var(--accent)') +
+    hashRow('SHA-512 (512-bit)', s512, 'var(--accent2)');
+  checkVerify();
+}
+
+// Verify
+document.getElementById('compareHash').addEventListener('input', checkVerify);
+
+function checkVerify() {
+  const compare = document.getElementById('compareHash').value.trim().toLowerCase();
+  const div = document.getElementById('verifyResult');
+  if (!compare || lastHashes.length === 0) { div.textContent = ''; return; }
+  const match = lastHashes.some(h => h === compare);
+  div.innerHTML = match
+    ? '<span class="badge badge-safe">✔ MATCH — Hash verified! File/text is authentic.</span>'
+    : '<span class="badge badge-danger">✗ NO MATCH — Hash does not match any computed value.</span>';
+}
+</script>
+</body>
+</html>
